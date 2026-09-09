@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b6b67" />
+<title>公費健康檢查與癌症篩檢小幫手｜台灣 2026 V3.4</title>
+<style>
+  :root{
+    --ink:#183230; --muted:#667a78; --bg:#f4fbf9; --card:#ffffff;
+    --brand:#0b6b67; --brand2:#128a83; --accent:#f3a83b;
+    --ok:#167a55; --okbg:#eaf8f1; --no:#8a5b2f; --nobg:#fff6e9;
+    --line:#dbeae6; --shadow:0 14px 40px rgba(20,75,70,.10);
+    --r:22px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:linear-gradient(180deg,#eaf8f5 0,#f8fcfb 32%,#f4fbf9 100%);color:var(--ink);line-height:1.6}
+  button,input,select{font:inherit}
+  a{color:var(--brand)}
+  .wrap{width:min(920px,calc(100% - 28px));margin:auto}
+  header{padding:26px 0 12px}
+  .hero{background:linear-gradient(135deg,#0a625e,#0f8880);color:white;border-radius:30px;padding:30px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08);right:-70px;top:-90px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.16);padding:6px 11px;border-radius:999px;font-size:.85rem;font-weight:700}
+  h1{font-size:clamp(1.75rem,7vw,2.65rem);line-height:1.18;margin:16px 0 10px;letter-spacing:.02em}
+  .hero p{margin:0;max-width:700px;color:#ecfffc}
+  .updated{margin-top:18px;font-size:.83rem;color:#d8f4f0}
+  main{padding:14px 0 44px}
+  .notice{background:#fffaf1;border:1px solid #f0dec1;border-radius:18px;padding:14px 16px;margin:16px 0;color:#6d5331;font-size:.93rem}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin:16px 0}
+  .section-title{font-size:1.18rem;font-weight:800;margin:0 0 4px}.section-sub{color:var(--muted);font-size:.91rem;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  .field{border:1px solid var(--line);border-radius:18px;padding:15px;background:#fbfefd}
+  .field label.head{font-weight:800;display:block;margin-bottom:7px}.help{font-size:.82rem;color:var(--muted);margin-top:5px}
+  input[type=number], select{width:100%;border:1px solid #cfe2de;border-radius:12px;padding:12px 13px;background:white;color:var(--ink);outline:none}
+  input:focus,select:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(18,138,131,.12)}
+  .choices{display:flex;flex-wrap:wrap;gap:9px}
+  .choice{position:relative}
+  .choice input{position:absolute;opacity:0;pointer-events:none}
+  .choice span{display:block;border:1px solid #cfe2de;border-radius:999px;padding:8px 13px;background:white;cursor:pointer;font-weight:650;font-size:.92rem}
+  .choice input:checked+span{background:#e2f6f2;border-color:var(--brand2);color:#075d58;box-shadow:inset 0 0 0 1px var(--brand2)}
+  .conditional{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .conditional.show{display:block}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .record-box{background:#f7fcfb;border:1px solid #cfe7e2;border-radius:20px;padding:16px}
+  .record-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+  .record-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+  .record-item strong{display:block;font-size:.95rem;margin-bottom:4px}
+  .record-item small{display:block;color:var(--muted);font-size:.79rem;margin-bottom:9px;line-height:1.5}
+  .record-item select,.record-item input[type="number"]{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:.92rem;background:#fff;color:var(--ink)}
+  .record-year-details{display:none;margin-top:9px}
+  .record-year-details.show{display:block}
+  .record-note{font-size:.82rem;color:var(--muted);margin-top:10px;line-height:1.6}
+
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .btn{border:0;border-radius:14px;padding:12px 17px;font-weight:800;cursor:pointer;transition:.15s transform,.15s opacity}
+  .btn:active{transform:scale(.98)}
+  .primary{background:var(--brand);color:white;min-width:170px}.secondary{background:#eaf4f2;color:var(--brand)}.ghost{background:white;border:1px solid var(--line);color:var(--ink)}
+  .error{display:none;background:#fff0ef;color:#9b3d36;border:1px solid #f2c9c5;border-radius:14px;padding:11px 13px;margin-top:12px;font-size:.9rem}.error.show{display:block}
+  #results{display:none;scroll-margin-top:12px}.result-head{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.count{font-size:2.2rem;font-weight:900;color:var(--brand);line-height:1}.count small{font-size:.9rem;font-weight:700;color:var(--muted)}
+  .summary{background:#eaf8f5;border:1px solid #cdebe5;border-radius:18px;padding:15px 16px;margin:14px 0}
+  .cards{display:grid;gap:12px}
+  .screen-card{border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;grid-template-columns:auto 1fr;gap:12px;background:white}
+  .screen-card.ok{border-color:#c7e8d8;background:linear-gradient(180deg,#fff,#f8fffb)}
+  .screen-card.maybe{border-color:#eeddbf;background:linear-gradient(180deg,#fff,#fffaf2)}
+  .icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#edf7f5;font-size:1.35rem}
+  .screen-card.ok .icon{background:var(--okbg)}.screen-card.maybe .icon{background:var(--nobg)}
+  .card-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.card-title{font-weight:900;font-size:1.04rem}.tag{font-size:.77rem;font-weight:800;border-radius:999px;padding:4px 9px;background:#eef3f2;color:#526663}.tag.ok{background:var(--okbg);color:var(--ok)}.tag.maybe{background:var(--nobg);color:var(--no)}
+  .reason{font-size:.92rem;margin:6px 0 0}.meta{font-size:.82rem;color:var(--muted);margin-top:7px}.why{font-weight:800;color:#345d59}
+  .footnote{font-size:.82rem;color:var(--muted);margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .sources details{border-top:1px solid var(--line);padding:12px 0}.sources details:first-of-type{border-top:0}.sources summary{cursor:pointer;font-weight:800}.sources p{font-size:.88rem;color:var(--muted)}
+  .source-links{display:grid;gap:8px}.source-links a{word-break:break-all;font-size:.87rem}
+  footer{padding:0 0 42px;color:var(--muted);font-size:.8rem;text-align:center}
+  .mini{font-size:.79rem;color:var(--muted)}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}.hero{padding:38px 36px}.panel{padding:28px}.cards{grid-template-columns:1fr 1fr}.screen-card{min-height:180px}.record-grid{grid-template-columns:1fr 1fr}}
+  @media print{body{background:white}.hero,.panel.form-panel,.btns,.notice,.sources,footer{display:none!important}#results{display:block!important}.panel{box-shadow:none;border:0;padding:0}.screen-card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <section class="hero">
+    <div class="eyebrow">🛡️ 台灣公費篩檢｜2026 現行版</div>
+    <h1>我現在可以做哪些<br>公費健康檢查？</h1>
+    <p>填寫幾個基本資料，快速找出你目前符合的成人健康檢查與公費癌症篩檢，並推估何時可以再做。</p>
+    <div class="updated">2026-09｜V3.4：統一週期型篩檢四種紀錄選項</div>
+  </section>
+</header>
+<main class="wrap">
+  <div class="notice"><strong>先說清楚：</strong>本工具提供「基本資格＋最近篩檢紀錄」初步推估。成人健檢會依最近一次檢查民國年份計算；癌症篩檢則可直接勾選近期是否已做過，協助判斷本輪是否可再使用。實際資格仍以健保系統、醫療院所及政府最新公告為準。</div>
+
+  <section class="panel form-panel" id="formPanel">
+    <h2 class="section-title">基本資料</h2>
+    <p class="section-sub">不用姓名、身分證字號，也不會上傳資料；所有判斷都在你的瀏覽器中完成。</p>
+    <form id="screenForm" novalidate>
+      <div class="grid">
+        <div class="field">
+          <label class="head" for="birthYear">出生年（西元）</label>
+          <input id="birthYear" name="birthYear" type="number" inputmode="numeric" min="1900" max="2026" placeholder="例如：1980" required>
+          <div class="help">本工具以「2026 − 出生年」計算政策年齡；例如 1980 年出生，今年政策年齡為 46 歲。</div>
+        </div>
+
+        <div class="field">
+          <label class="head">公費規則適用性別</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="sex" value="F"><span>女性</span></label>
+            <label class="choice"><input type="radio" name="sex" value="M"><span>男性</span></label>
+          </div>
+          <div class="help">用於乳房、子宮頸與肺癌家族史年齡條件的政策判斷。</div>
+        </div>
+
+        <div class="field">
+          <label class="head">是否具原住民身分？</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="indigenous" value="yes"><span>是</span></label>
+            <label class="choice"><input type="radio" name="indigenous" value="no"><span>否</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="head">是否為小兒麻痺患者？</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="polio" value="yes"><span>是</span></label>
+            <label class="choice"><input type="radio" name="polio" value="no"><span>否</span></label>
+          </div>
+          <div class="help">35 歲以上小兒麻痺患者可每年接受 1 次成人預防保健。</div>
+        </div>
+
+        <div class="field">
+          <label class="head">檳榔使用史</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="betel" value="never"><span>從未</span></label>
+            <label class="choice"><input type="radio" name="betel" value="current"><span>目前有嚼</span></label>
+            <label class="choice"><input type="radio" name="betel" value="former"><span>以前有，已戒</span></label>
+          </div>
+        </div>
+
+        <div class="field span2">
+          <label class="head">吸菸狀況</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="smoke" value="never"><span>從未吸菸</span></label>
+            <label class="choice"><input type="radio" name="smoke" value="current"><span>目前吸菸</span></label>
+            <label class="choice"><input type="radio" name="smoke" value="former"><span>已戒菸</span></label>
+          </div>
+          <div id="smokeDetails" class="conditional">
+            <div class="two">
+              <div>
+                <label class="head" for="cigsPerDay">平均每天幾支？</label>
+                <input id="cigsPerDay" type="number" min="0" max="100" step="1" placeholder="例如：20">
+              </div>
+              <div>
+                <label class="head" for="smokeYears">共吸菸幾年？</label>
+                <input id="smokeYears" type="number" min="0" max="90" step="0.5" placeholder="例如：20">
+              </div>
+            </div>
+            <div id="formerDetails" class="conditional">
+              <label class="head" for="quitYears">戒菸多久？（年）</label>
+              <input id="quitYears" type="number" min="0" max="90" step="0.5" placeholder="例如：5">
+            </div>
+            <div id="currentQuit" class="conditional">
+              <label class="head">若符合肺癌 LDCT 篩檢，是否願意接受戒菸服務／衛教？</label>
+              <div class="choices">
+                <label class="choice"><input type="radio" name="quitAgree" value="yes"><span>願意</span></label>
+                <label class="choice"><input type="radio" name="quitAgree" value="no"><span>暫不</span></label>
+              </div>
+            </div>
+            <div class="help">包年＝平均每日吸菸包數 × 吸菸年數；1 包以 20 支計。</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="head">肺癌一等親家族史</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="lungFH" value="yes"><span>有</span></label>
+            <label class="choice"><input type="radio" name="lungFH" value="no"><span>沒有</span></label>
+          </div>
+          <div class="help">指父母、子女或兄弟姊妹曾被診斷肺癌。</div>
+        </div>
+
+        <div class="field">
+          <label class="head">大腸癌一等親家族史</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="colonFH" value="yes"><span>有</span></label>
+            <label class="choice"><input type="radio" name="colonFH" value="no"><span>沒有</span></label>
+          </div>
+          <div class="help">指父母、子女或兄弟姊妹曾被診斷大腸癌。</div>
+        </div>
+
+        <div class="field span2">
+          <label class="head">最近一次公費成人預防保健紀錄</label>
+          <div class="help">不用自己判斷「算不算最近」。只要告訴系統是否做過、以及最近一次民國年份，系統會依目前資格自動套用每 1／3／5 年一次的規則。</div>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="adultUsed" value="never"><span>從未做過</span></label>
+            <label class="choice"><input type="radio" name="adultUsed" value="known"><span>曾做過，記得最近一次年份</span></label>
+            <label class="choice"><input type="radio" name="adultUsed" value="completed"><span>本次資格期間已完成</span></label>
+            <label class="choice"><input type="radio" name="adultUsed" value="unknown"><span>不確定／忘記上次時間</span></label>
+          </div>
+          <div id="adultYearDetails" class="conditional">
+            <label class="head" for="adultLastYear">最近一次是民國幾年？</label>
+            <input id="adultLastYear" type="number" inputmode="numeric" min="84" max="115" placeholder="例如：112">
+            <div class="help">今年為民國 115 年（西元 2026 年）。例如目前屬於每 3 年 1 次，上次是民國 112 年，系統會判定民國 115 年已滿 3 年，今年可再做。</div>
+          </div>
+        </div>
+
+        <div class="field span2 record-box">
+          <label class="head">公費癌症篩檢紀錄</label>
+          <div class="help">週期型篩檢可直接選擇紀錄狀態；若記得最近一次年份，系統會依每 1／2／3 年規則自動推估。若已確認本次資格期間完成，也可直接選「本次資格期間已完成」。</div>
+
+          <div class="record-grid">
+            <div class="record-item">
+              <strong>乳房 X 光攝影</strong>
+              <small>40–74 歲女性｜每 2 年 1 次</small>
+              <select name="breastRecord" data-year-target="breastYearDetails">
+                <option value="">請選擇紀錄</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
+              </select>
+              <div id="breastYearDetails" class="record-year-details">
+                <input id="breastLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：113">
+              </div>
+            </div>
+
+            <div class="record-item">
+              <strong>子宮頸抹片</strong>
+              <small>25–29 歲每 3 年 1 次；30 歲以上每年補助 1 次</small>
+              <select name="cervixRecord" data-year-target="cervixYearDetails">
+                <option value="">請選擇紀錄</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
+              </select>
+              <div id="cervixYearDetails" class="record-year-details">
+                <input id="cervixLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：114">
+              </div>
+            </div>
+
+            <div class="record-item">
+              <strong>糞便潛血檢查</strong>
+              <small>符合資格者｜每 2 年 1 次</small>
+              <select name="colonRecord" data-year-target="colonYearDetails">
+                <option value="">請選擇紀錄</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
+              </select>
+              <div id="colonYearDetails" class="record-year-details">
+                <input id="colonLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：113">
+              </div>
+            </div>
+
+            <div class="record-item">
+              <strong>口腔黏膜檢查</strong>
+              <small>符合風險條件者｜每 2 年 1 次</small>
+              <select name="oralRecord" data-year-target="oralYearDetails">
+                <option value="">請選擇紀錄</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
+              </select>
+              <div id="oralYearDetails" class="record-year-details">
+                <input id="oralLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：113">
+              </div>
+            </div>
+
+            <div class="record-item">
+              <strong>肺癌 LDCT</strong>
+              <small>符合家族史或重度吸菸條件者｜每 2 年 1 次</small>
+              <select name="lungRecord" data-year-target="lungYearDetails">
+                <option value="">請選擇紀錄</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
+              </select>
+              <div id="lungYearDetails" class="record-year-details">
+                <input id="lungLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：113">
+              </div>
+            </div>
+
+            <div class="record-item">
+              <strong>女性 HPV 檢測</strong>
+              <small>35、45、65 歲「當年齡」各 1 次；不是每幾年循環</small>
+              <select name="hpvRecord">
+                <option value="">請選擇紀錄</option>
+                <option value="notdone">目前這個指定年齡尚未做過</option>
+                <option value="done">目前這個指定年齡已做過</option>
+                <option value="unknown">不確定</option>
+              </select>
+            </div>
+
+            <div class="record-item">
+              <strong>胃幽門螺旋桿菌糞便抗原檢測</strong>
+              <small>45–74 歲｜公費終身 1 次</small>
+              <select name="gastricRecord">
+                <option value="">請選擇紀錄</option>
+                <option value="never">此生從未使用過這項公費服務</option>
+                <option value="done">此生已使用過</option>
+                <option value="unknown">不確定</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="record-note">年份以民國年填寫。今年為民國 115 年。系統依年份做初步推估；實際是否已達公費間隔，仍以健保快易通、健保卡紀錄或醫療院所查詢為準。</div>
+        </div>
+      </div>
+
+      <div id="formError" class="error">請先完成出生年、性別、身分與風險資料，再進行判斷。</div>
+      <div class="btns">
+        <button class="btn primary" id="checkBtn" type="button" onclick="window.__screeningClickLock=true;if(window.runScreeningCheck){window.runScreeningCheck();}setTimeout(function(){window.__screeningClickLock=false;},250);return false;">🔎 查看我的篩檢資格</button>
+        <button class="btn ghost" type="reset">重新填寫</button>
+      </div>
+      <div class="help" style="margin-top:10px">📱 若直接用 iPhone「檔案預覽」開啟 HTML，系統可能限制 JavaScript；正式發布到 GitHub Pages／一般瀏覽器後才是完整互動環境。</div>
+    </form>
+  </section>
+
+  <section class="panel" id="results" aria-live="polite">
+    <div class="result-head">
+      <div>
+        <h2 class="section-title">你的公費健康檢查結果</h2>
+        <div class="mini" id="ageText"></div>
+      </div>
+      <div class="count"><span id="eligibleCount">0</span> <small>項目前符合／可使用</small></div>
+    </div>
+    <div class="summary" id="resultSummary"></div>
+    <div class="cards" id="resultCards"></div>
+    <div class="footnote">
+      <strong>重要：</strong>成人預防保健的再次可做年度，是依你填寫的「最近一次民國年份」與目前年齡層頻率做初步推估；實際使用資格仍以健保卡／健保快易通與醫療院所系統為準。癌症篩檢依類型分成週期型、指定年齡型與終身一次型；週期型會以最近一次民國年份推估是否已滿間隔。若紀錄不確定，請再以健保快易通或醫療院所系統確認。
+    </div>
+    <div class="btns">
+      <button class="btn secondary" id="shareBtn" type="button">分享結果摘要</button>
+      <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
+      <button class="btn ghost" id="backBtn" type="button">修改資料</button>
+    </div>
+  </section>
+
+  <section class="panel sources">
+    <h2 class="section-title">2026 公費健康檢查規則摘要</h2>
+    <p class="section-sub">這個版本納入成人預防保健，以及目前官方列出的乳癌、子宮頸抹片、HPV、大腸癌、口腔癌、肺癌 LDCT與胃幽門螺旋桿菌篩檢服務。</p>
+    <details><summary>成人預防保健</summary><p>30–39 歲每 5 年 1 次；40–64 歲每 3 年 1 次；65 歲以上每年 1 次。55 歲以上原住民、35 歲以上小兒麻痺患者亦為每年 1 次。</p></details>
+    <details><summary>乳癌／子宮頸抹片／HPV</summary><p>乳房 X 光攝影：40–74 歲女性，每 2 年 1 次。子宮頸抹片：25–29 歲女性每 3 年 1 次；30 歲以上女性每年 1 次。HPV：35、45、65 歲女性當年齡 1 次。</p></details>
+    <details><summary>大腸癌／口腔癌</summary><p>糞便潛血：45–74 歲，以及 40–44 歲且父母、子女或兄弟姊妹曾罹患大腸癌者，每 2 年 1 次。口腔黏膜：30 歲以上有嚼檳榔（含已戒）或目前吸菸者；18 歲以上原住民若有嚼檳榔（含已戒）亦符合，每 2 年 1 次。</p></details>
+    <details><summary>肺癌 LDCT／胃癌預防</summary><p>LDCT：具肺癌一等親家族史者，女性 40–74 歲、男性 45–74 歲；或 50–74 歲且吸菸史達 20 包年以上，目前仍吸菸或戒菸未滿 15 年者，每 2 年 1 次。胃幽門螺旋桿菌糞便抗原檢測：45–74 歲，終身 1 次。</p></details>
+    <div class="source-links">
+      <a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=189" target="_blank" rel="noopener">國民健康署｜成人預防保健</a>
+      <a href="https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=612&pid=1102" target="_blank" rel="noopener">國民健康署｜癌症篩檢訊息</a>
+      <a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=198" target="_blank" rel="noopener">國民健康署｜女性子宮頸癌篩檢</a>
+      <a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=190" target="_blank" rel="noopener">國民健康署｜大腸癌篩檢</a>
+      <a href="https://dep.mohw.gov.tw/DOOH/fp-7148-80480-124.html" target="_blank" rel="noopener">衛福部口腔健康司｜口腔癌篩檢及院所查詢</a>
+      <a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=4619" target="_blank" rel="noopener">國民健康署｜胸部低劑量電腦斷層檢查服務</a>
+      <a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=5006" target="_blank" rel="noopener">國民健康署｜胃癌防治</a>
+    </div>
+  </section>
+</main>
+<footer class="wrap">衛教用途｜資料不送出、不儲存個人識別資訊｜再次可做年度為初步推估｜政策可能調整，請以政府最新公告為準</footer>
+
+<script>
+(() => {
+  const YEAR = 2026;
+  const ROC_YEAR = 115;
+  const form = document.getElementById('screenForm');
+  const smokeDetails = document.getElementById('smokeDetails');
+  const formerDetails = document.getElementById('formerDetails');
+  const currentQuit = document.getElementById('currentQuit');
+  const adultYearDetails = document.getElementById('adultYearDetails');
+  const errorBox = document.getElementById('formError');
+  const results = document.getElementById('results');
+  const cardsEl = document.getElementById('resultCards');
+  const eligibleCount = document.getElementById('eligibleCount');
+  const resultSummary = document.getElementById('resultSummary');
+  const ageText = document.getElementById('ageText');
+
+  const q = (name) => {
+    const el = form.querySelector(`[name="${name}"]:checked`);
+    return el ? el.value : '';
+  };
+  const num = (id) => Number(document.getElementById(id).value);
+  const val = (name) => {
+    const el = form.querySelector(`[name="${name}"]`);
+    return el ? el.value : '';
+  };
+
+  function toggleSmoking(){
+    const s = q('smoke');
+    smokeDetails.classList.toggle('show', s === 'current' || s === 'former');
+    formerDetails.classList.toggle('show', s === 'former');
+    currentQuit.classList.toggle('show', s === 'current');
+  }
+  form.addEventListener('change', e => {
+    if(e.target.name === 'smoke') toggleSmoking();
+    if(e.target.name === 'adultUsed') adultYearDetails.classList.toggle('show', q('adultUsed') === 'known');
+    if(e.target.matches && e.target.matches('select[data-year-target]')){
+      const box = document.getElementById(e.target.getAttribute('data-year-target'));
+      if(box) box.classList.toggle('show', e.target.value === 'known');
+    }
+  });
+  form.addEventListener('reset', () => setTimeout(() => {
+    toggleSmoking();
+    adultYearDetails.classList.remove('show');
+    document.querySelectorAll('.record-year-details').forEach(el => el.classList.remove('show'));
+    results.style.display='none';
+    errorBox.classList.remove('show');
+  }, 0));
+
+  const make = (key, title, icon, eligible, reason, interval, note='', status='') => ({key,title,icon,eligible,reason,interval,note,status});
+
+  function evaluate(data){
+    const a = data.age, F = data.sex === 'F', M = data.sex === 'M';
+    const out = [];
+
+    // 成人預防保健：依目前年齡層與最近一次民國年份做再次可使用年度初步推估
+    let adultBase=false, adultInterval=0, adultGroup='', adultEligible=false, adultReason='', adultNote='', adultStatus='';
+    if((data.polio && a>=35) || (data.indigenous && a>=55) || a>=65){
+      adultBase=true; adultInterval=1; adultGroup = data.polio && a>=35 ? '35 歲以上小兒麻痺患者' : (data.indigenous && a>=55 ? '55 歲以上原住民' : '65 歲以上民眾');
+    } else if(a>=40){ adultBase=true; adultInterval=3; adultGroup='40–64 歲民眾'; }
+    else if(a>=30){ adultBase=true; adultInterval=5; adultGroup='30–39 歲民眾'; }
+
+    if(!adultBase){
+      adultReason='目前尚未達成人預防保健公費年齡條件。';
+    } else if(data.adultUsed==='never'){
+      adultEligible=true; adultReason=`${adultGroup}，公費頻率為每 ${adultInterval} 年 1 次；你填寫從未使用過，因此今年可接受服務。`;
+    } else if(data.adultUsed==='completed'){
+      adultReason=`${adultGroup}，符合基本資格；但你填寫本次資格期間已完成公費成人預防保健，因此目前不需再次使用。`;
+      adultStatus='used';
+      adultNote=`下一次可使用時間仍需依目前每 ${adultInterval} 年 1 次的規則與實際完成日期判斷。`;
+    } else if(data.adultUsed==='unknown'){
+      adultReason=`${adultGroup}，符合基本資格，但你目前不確定或忘記上次使用時間。`;
+      adultStatus='maybe';
+      adultNote='建議查詢健保紀錄，再確認今年是否可使用。';
+    } else if(!Number.isFinite(data.adultLastYear)){
+      adultReason=`${adultGroup}，但尚未填寫最近一次公費成人健檢年份。`;
+      adultStatus='maybe';
+      adultNote='填入民國年份後，系統才能依每 ${adultInterval} 年 1 次的規則推估今年能否再做。';
+    } else {
+      const gap=ROC_YEAR-data.adultLastYear;
+      const nextRoc=data.adultLastYear+adultInterval;
+      const nextCe=nextRoc+1911;
+      if(gap>=adultInterval){
+        adultEligible=true;
+        adultReason=`${adultGroup}，上次為民國 ${data.adultLastYear} 年，至今年民國 ${ROC_YEAR} 年已間隔 ${gap} 年；依每 ${adultInterval} 年 1 次推估，今年可再做。`;
+      } else {
+        adultReason=`${adultGroup}，上次為民國 ${data.adultLastYear} 年，至今年僅間隔 ${gap} 年，尚未滿每 ${adultInterval} 年 1 次的間隔。`;
+        adultNote=`依目前年齡層頻率推估，最快民國 ${nextRoc} 年（西元 ${nextCe} 年）可再做；若期間進入較高頻率年齡層，實際資格請再以健保系統確認。`;
+      }
+    }
+    out.push(make('adult','成人預防保健健康檢查','🩺',adultEligible,adultReason,adultBase ? `每 ${adultInterval} 年 1 次` : '依年齡／身分',adultNote,adultStatus));
+
+    // 週期型癌症篩檢：和成人健檢一樣，用最近一次民國年份推估是否已滿間隔
+    function recurringScreening(baseEligible, baseReason, record, lastYear, interval, label){
+      let eligible=false, reason=baseReason, note='', status='';
+      if(!baseEligible) return {eligible,reason,note,status};
+
+      if(record==='never'){
+        eligible=true;
+        reason=`${baseReason} 你填寫從未使用過公費${label}，初步判定目前可使用。`;
+      } else if(record==='known'){
+        const gap=ROC_YEAR-lastYear;
+        const nextRoc=lastYear+interval;
+        const nextCe=nextRoc+1911;
+        if(Number.isFinite(lastYear) && lastYear>0 && lastYear<=ROC_YEAR){
+          if(gap>=interval){
+            eligible=true;
+            reason=`${baseReason} 最近一次為民國 ${lastYear} 年，至今年民國 ${ROC_YEAR} 年已間隔 ${gap} 年；依每 ${interval} 年 1 次推估，目前可再做。`;
+          }else{
+            status='used';
+            reason=`${baseReason} 最近一次為民國 ${lastYear} 年，至今年僅間隔 ${gap} 年，尚未滿每 ${interval} 年 1 次的間隔。`;
+            note=`依年份初步推估，最快民國 ${nextRoc} 年（西元 ${nextCe} 年）可再做。`;
+          }
+        }else{
+          status='maybe';
+          reason=`${baseReason} 已選擇「記得年份」，但年份資料無法判讀。`;
+          note='請重新填寫最近一次民國年份。';
+        }
+      } else if(record==='completed'){
+        status='used';
+        reason=`${baseReason} 你填寫本次資格期間已完成公費${label}，因此目前這一輪不需再次使用。`;
+        note=`下一次可使用時間仍需依每 ${interval} 年 1 次的規則與實際完成日期判斷。`;
+      } else {
+        status='maybe';
+        reason=`${baseReason} 你目前不確定或忘記上次公費${label}的時間，因此目前只能判斷「基本資格符合」。`;
+        note='可用健保快易通或請醫療院所查詢前次紀錄。';
+      }
+      return {eligible,reason,note,status};
+    }
+
+    const breastBase = F && a>=40 && a<=74;
+    const breastBaseReason = F
+      ? (a<40 ? '尚未達 40 歲。' : a>74 ? '已超過公費常規篩檢年齡 74 歲。' : '40–74 歲女性，符合乳房 X 光攝影基本資格。')
+      : '公費乳房 X 光攝影對象為 40–74 歲女性。';
+    const breastRec = recurringScreening(breastBase, breastBaseReason, data.breastRecord, data.breastLastYear, 2, '乳房 X 光攝影');
+    out.push(make('breast','乳房 X 光攝影','🎀',breastRec.eligible,breastRec.reason,'每 2 年 1 次',breastRec.note,breastRec.status));
+
+    let cerv=false, cervReason='', cervInterval='', cervYears=0;
+    if(!F){cervReason='公費子宮頸抹片對象為女性。'; cervInterval='—';}
+    else if(a<25){cervReason='尚未達 25 歲。'; cervInterval='—';}
+    else if(a<=29){
+      cerv=true; cervYears=3;
+      cervReason='25–29 歲女性，符合子宮頸抹片基本資格。';
+      cervInterval='每 3 年 1 次';
+    }else{
+      cerv=true; cervYears=1;
+      cervReason='30 歲以上女性，符合子宮頸抹片基本資格。';
+      cervInterval='每年 1 次（官方建議至少每 3 年 1 次）';
+    }
+    const cervRec = recurringScreening(cerv, cervReason, data.cervixRecord, data.cervixLastYear, cervYears || 1, '子宮頸抹片');
+    out.push(make('cervix','子宮頸抹片','🌸',cervRec.eligible,cervRec.reason,cervInterval,cervRec.note,cervRec.status));
+
+    const colon = (a>=45 && a<=74) || (a>=40 && a<=44 && data.colonFH);
+    let colonReason = colon
+      ? (a>=45 ? '45–74 歲民眾，符合糞便潛血檢查基本資格。' : '40–44 歲且具大腸癌一等親家族史，符合基本資格。')
+      : (a<40 ? '尚未達一般公費篩檢年齡。' : a<=44 ? '40–44 歲需具有大腸癌一等親家族史。' : '已超過公費常規篩檢年齡 74 歲。');
+    const colonRec = recurringScreening(colon, colonReason, data.colonRecord, data.colonLastYear, 2, '糞便潛血檢查');
+    out.push(make('colon','糞便潛血檢查','🧪',colonRec.eligible,colonRec.reason,'每 2 年 1 次',colonRec.note,colonRec.status));
+
+    const betelRisk = data.betel === 'current' || data.betel === 'former';
+    const currentSmoker = data.smoke === 'current';
+    const oral = (a>=30 && (betelRisk || currentSmoker)) || (data.indigenous && a>=18 && betelRisk);
+    let oralReason='';
+    if(oral){
+      if(data.indigenous && a>=18 && a<30 && betelRisk) oralReason='18 歲以上原住民，且有嚼檳榔史（含已戒），符合口腔黏膜檢查基本資格。';
+      else if(betelRisk) oralReason='30 歲以上，且有嚼檳榔史（含已戒），符合口腔黏膜檢查基本資格。';
+      else oralReason='30 歲以上且目前吸菸，符合口腔黏膜檢查基本資格。';
+    }else if(a<18) oralReason='尚未達公費口腔黏膜檢查最低年齡。';
+    else if(data.smoke==='former' && !betelRisk) oralReason='已戒菸、且無嚼檳榔史：依現行公費規則，單純「已戒菸」不列為口腔黏膜檢查補助條件。';
+    else if(a<30 && !data.indigenous) oralReason='未滿 30 歲且非原住民，尚不符合公費條件。';
+    else if(a<30 && data.indigenous && !betelRisk) oralReason='18–29 歲原住民需有嚼檳榔史（含已戒）。';
+    else oralReason='目前未有公費規則要求的嚼檳榔史或吸菸條件。';
+    const oralRec = recurringScreening(oral, oralReason, data.oralRecord, data.oralLastYear, 2, '口腔黏膜檢查');
+    out.push(make('oral','口腔黏膜檢查','🦷',oralRec.eligible,oralRec.reason,'每 2 年 1 次',oralRec.note,oralRec.status));
+
+    const familyLung = data.lungFH && ((F && a>=40 && a<=74) || (M && a>=45 && a<=74));
+    const heavyBase = a>=50 && a<=74 && data.packYears>=20;
+    const heavySmoking = heavyBase && (data.smoke==='current' || (data.smoke==='former' && data.quitYears<15));
+    let lungBase = familyLung || heavySmoking;
+    let lungBaseReason=''; let lungExtraNote=''; let lungExtraStatus='';
+    if(familyLung) lungBaseReason=`具肺癌一等親家族史，且符合${F?'女性 40–74':'男性 45–74'}歲基本條件。`;
+    else if(heavySmoking){
+      lungBaseReason=`50–74 歲，吸菸史約 ${data.packYears.toFixed(1)} 包年，且${data.smoke==='current'?'目前仍吸菸':'戒菸未滿 15 年'}，符合重度吸菸者基本條件。`;
+      if(data.smoke==='current' && data.quitAgree!=='yes'){
+        lungExtraStatus='maybe';
+        lungExtraNote='現行規則要求仍吸菸者應同意接受戒菸服務／衛教；請向承辦院所確認。';
+      }
+    } else if(a<40) lungBaseReason='尚未達肺癌公費 LDCT 的年齡門檻。';
+    else if(data.lungFH) lungBaseReason=`有肺癌家族史，但目前未符合${F?'女性 40–74':'男性 45–74'}歲年齡條件。`;
+    else if(a>=50 && a<=74 && data.packYears<20 && data.smoke!=='never') lungBaseReason=`吸菸史約 ${data.packYears.toFixed(1)} 包年，未達 20 包年門檻。`;
+    else if(data.smoke==='former' && data.quitYears>=15 && heavyBase) lungBaseReason='吸菸史達 20 包年以上，但戒菸已達 15 年以上，未符合重度吸菸者公費條件。';
+    else lungBaseReason='目前未符合肺癌一等親家族史或重度吸菸者條件。';
+
+    const lungRec = recurringScreening(lungBase, lungBaseReason, data.lungRecord, data.lungLastYear, 2, '肺癌 LDCT');
+    if(lungBase && lungExtraStatus==='maybe' && lungRec.eligible){
+      lungRec.status='maybe';
+      lungRec.note=lungExtraNote;
+    }
+    out.push(make('lung','低劑量電腦斷層 LDCT','🫁',lungRec.eligible,lungRec.reason,'每 2 年 1 次',lungRec.note,lungRec.status));
+
+    // HPV：指定年齡型，不用用「幾年前」判斷
+    const hpv = F && [35,45,65].includes(a);
+    let hpvEligible=false, hpvReason='', hpvStatus='', hpvNote='';
+    if(!F) hpvReason='公費 HPV 檢測對象為女性。';
+    else if(![35,45,65].includes(a)) hpvReason='公費 HPV 檢測只在 35、45、65 歲「當年齡」各提供 1 次。';
+    else if(data.hpvRecord==='notdone'){
+      hpvEligible=true;
+      hpvReason=`今年政策年齡為 ${a} 歲，且你填寫目前這個指定年齡尚未使用過公費 HPV 檢測，初步判定目前可使用。`;
+    }else if(data.hpvRecord==='done'){
+      hpvReason=`今年政策年齡為 ${a} 歲，但你填寫目前這個指定年齡的公費 HPV 檢測已做過，因此不能重複使用。`;
+      hpvStatus='used';
+    }else{
+      hpvReason=`今年政策年齡為 ${a} 歲，符合基本資格，但目前這個指定年齡是否已使用過公費 HPV 檢測尚未確認。`;
+      hpvStatus='maybe';
+      hpvNote='若 35 歲曾做過，不會因此取消 45 歲或 65 歲的指定年齡資格；要確認的是「目前這個指定年齡」是否已做。';
+    }
+    out.push(make('hpv','女性 HPV 檢測','🧬',hpvEligible,hpvReason,'35、45、65 歲當年齡各 1 次',hpvNote,hpvStatus));
+
+    // 胃幽門螺旋桿菌：終身一次型
+    let gastricEligible=false, gastricReason='', gastricStatus='', gastricNote='';
+    if(a<45) gastricReason='尚未達 45 歲。';
+    else if(a>74) gastricReason='已超過公費服務年齡 74 歲。';
+    else if(data.gastricRecord==='never'){
+      gastricEligible=true;
+      gastricReason='45–74 歲，且你填寫此生尚未使用過這項公費服務，初步判定目前可使用。';
+    }else if(data.gastricRecord==='done'){
+      gastricReason='45–74 歲，但你填寫此生已使用過這項「終身 1 次」公費服務，因此不能再次使用。';
+      gastricStatus='used';
+    }else{
+      gastricReason='45–74 歲，符合年齡條件，但是否曾使用過這項終身 1 次公費服務尚未確認。';
+      gastricStatus='maybe';
+      gastricNote='請查詢健保紀錄或向醫療院所確認。';
+    }
+    out.push(make('gastric','胃幽門螺旋桿菌糞便抗原檢測','🧫',gastricEligible,gastricReason,'45–74 歲終身 1 次',gastricNote,gastricStatus));
+
+    return out;
+  }
+
+  function render(items, data){
+    const count = items.filter(x=>x.eligible).length;
+    eligibleCount.textContent = count;
+    ageText.textContent = `出生年 ${data.birthYear}｜西元 2026／民國 115 年｜政策年齡 ${data.age} 歲`;
+    resultSummary.innerHTML = count
+      ? `依你填寫的基本資料與前次篩檢年份，初步找到 <strong>${count} 項</strong>目前可使用的公費健康服務；週期型項目會自動計算是否已滿再次篩檢間隔。`
+      : `目前沒有找到明確可使用的公費健康服務。這不代表不需要健康檢查；若有症狀、家族病史或其他風險，仍應依醫師建議評估。`;
+
+    const sorted=[...items].sort((a,b)=>Number(b.eligible)-Number(a.eligible));
+    cardsEl.innerHTML = sorted.map(item => {
+      const cls = (item.status==='maybe' || item.status==='used') ? 'maybe' : item.eligible ? 'ok' : '';
+      const tagCls = (item.status==='maybe' || item.status==='used') ? 'maybe' : item.eligible ? 'ok' : '';
+      const tag = item.status==='maybe' ? '需再確認'
+                : item.status==='used' ? '本輪已做過'
+                : item.eligible ? (item.key==='adult' ? '今年可做' : '目前可使用')
+                : (item.key==='adult' ? '目前尚不可再做' : '目前未符合');
+      return `<article class="screen-card ${cls}">
+        <div class="icon">${item.icon}</div>
+        <div>
+          <div class="card-top"><div class="card-title">${item.title}</div><span class="tag ${tagCls}">${tag}</span></div>
+          <p class="reason"><span class="why">判斷：</span>${item.reason}</p>
+          <div class="meta">公費頻率：${item.interval}</div>
+          ${item.note?`<div class="meta">提醒：${item.note}</div>`:''}
+        </div>
+      </article>`;
+    }).join('');
+
+    results.style.display='block';
+    try{ results.scrollIntoView({behavior:'smooth',block:'start'}); }catch(err){ results.scrollIntoView(); }
+
+    const eligibleNames=items.filter(x=>x.eligible).map(x=>x.title);
+    window.__shareText = `2026 台灣公費健康檢查初篩：政策年齡 ${data.age} 歲，初步符合／可使用 ${count} 項${eligibleNames.length?'：'+eligibleNames.join('、'):''}。成人健檢再次可做年度為初步推估，最終仍以健保系統、醫療院所及政府公告為準。`;
+  }
+
+  function runScreeningCheck(){
+    const birthYear = num('birthYear');
+    const sex=q('sex'), indigenous=q('indigenous'), polio=q('polio'), betel=q('betel'), smoke=q('smoke'), lungFH=q('lungFH'), colonFH=q('colonFH'), adultUsed=q('adultUsed');
+
+    if(!birthYear || birthYear<1900 || birthYear>YEAR || !sex || !indigenous || !polio || !betel || !smoke || !lungFH || !colonFH || !adultUsed){
+      errorBox.textContent='請先完成出生年、性別、身分與風險資料，再進行判斷。';
+      errorBox.classList.add('show');
+      try{ errorBox.scrollIntoView({behavior:'smooth',block:'center'}); }catch(err){ errorBox.scrollIntoView(); }
+      return;
+    }
+
+    if(adultUsed==='known'){
+      const ly=num('adultLastYear');
+      if(!Number.isFinite(ly) || ly<84 || ly>ROC_YEAR){
+        errorBox.textContent='請填寫有效的最近一次成人健檢民國年份（不可晚於民國 115 年）。';
+        errorBox.classList.add('show');
+        try{ errorBox.scrollIntoView({behavior:'smooth',block:'center'}); }catch(err){ errorBox.scrollIntoView(); }
+        return;
+      }
+    }
+
+    const recordYearChecks = [
+      ['breastRecord','breastLastYear','乳房 X 光攝影'],
+      ['cervixRecord','cervixLastYear','子宮頸抹片'],
+      ['colonRecord','colonLastYear','糞便潛血檢查'],
+      ['oralRecord','oralLastYear','口腔黏膜檢查'],
+      ['lungRecord','lungLastYear','肺癌 LDCT']
+    ];
+    for(const item of recordYearChecks){
+      if(val(item[0])==='known'){
+        const ly=num(item[1]);
+        if(!Number.isFinite(ly) || ly<1 || ly>ROC_YEAR){
+          errorBox.textContent=`請填寫有效的${item[2]}最近一次民國年份（不可晚於民國 ${ROC_YEAR} 年）。`;
+          errorBox.classList.add('show');
+          try{ errorBox.scrollIntoView({behavior:'smooth',block:'center'}); }catch(err){ errorBox.scrollIntoView(); }
+          return;
+        }
+      }
+    }
+
+    errorBox.textContent='請先完成出生年、性別、身分與風險資料，再進行判斷。';
+    errorBox.classList.remove('show');
+
+    const age=YEAR-birthYear;
+    let packYears=0, quitYears=999, quitAgree=q('quitAgree');
+
+    if(smoke==='current'||smoke==='former'){
+      const cigs=num('cigsPerDay'), years=num('smokeYears');
+      if(Number.isFinite(cigs)&&Number.isFinite(years)&&cigs>=0&&years>=0) packYears=(cigs/20)*years;
+      if(smoke==='former'){
+        const qy=num('quitYears');
+        quitYears=Number.isFinite(qy)&&qy>=0?qy:999;
+      }
+    }
+
+    const adultLastYear = adultUsed==='known' ? num('adultLastYear') : NaN;
+
+    const data={
+      birthYear,age,sex,
+      indigenous:indigenous==='yes',polio:polio==='yes',
+      betel,smoke,lungFH:lungFH==='yes',colonFH:colonFH==='yes',
+      adultUsed,adultLastYear,packYears,quitYears,quitAgree,
+      breastRecord:val('breastRecord'),
+      breastLastYear:val('breastRecord')==='known' ? num('breastLastYear') : NaN,
+      cervixRecord:val('cervixRecord'),
+      cervixLastYear:val('cervixRecord')==='known' ? num('cervixLastYear') : NaN,
+      colonRecord:val('colonRecord'),
+      colonLastYear:val('colonRecord')==='known' ? num('colonLastYear') : NaN,
+      oralRecord:val('oralRecord'),
+      oralLastYear:val('oralRecord')==='known' ? num('oralLastYear') : NaN,
+      lungRecord:val('lungRecord'),
+      lungLastYear:val('lungRecord')==='known' ? num('lungLastYear') : NaN,
+      hpvRecord:val('hpvRecord'),
+      gastricRecord:val('gastricRecord')
+    };
+
+    render(evaluate(data),data);
+  }
+
+  // 掛到全域，讓按鈕 inline onclick 也能直接執行；再保留事件監聽作為備援。
+  window.runScreeningCheck = runScreeningCheck;
+
+  const checkBtn = document.getElementById('checkBtn');
+  if(checkBtn){
+    checkBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      // inline onclick 已先執行；若該環境忽略 inline handler，這裡仍可執行。
+      if(!window.__screeningClickLock){
+        window.__screeningClickLock = true;
+        runScreeningCheck();
+        setTimeout(function(){ window.__screeningClickLock = false; }, 250);
+      }
+    });
+  }
+
+  // 若桌機使用者在輸入框按 Enter，也阻止 form 重新載入。
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    runScreeningCheck();
+  });
+
+  document.getElementById('backBtn').addEventListener('click',()=>document.getElementById('formPanel').scrollIntoView({behavior:'smooth'}));
+  document.getElementById('printBtn').addEventListener('click',()=>window.print());
+  document.getElementById('shareBtn').addEventListener('click',async()=>{
+    const text=window.__shareText||'2026 台灣公費健康檢查資格小幫手';
+    if(navigator.share){try{await navigator.share({title:'公費健康檢查初篩結果',text});return;}catch(e){}}
+    try{await navigator.clipboard.writeText(text);alert('結果摘要已複製。');}catch(e){alert(text);}
+  });
+})();
+</script>
+</body>
+</html>
