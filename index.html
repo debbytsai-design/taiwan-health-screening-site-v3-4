@@ -74,6 +74,7 @@
   footer{padding:0 0 42px;color:var(--muted);font-size:.8rem;text-align:center}
   .mini{font-size:.79rem;color:var(--muted)}
   @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}.hero{padding:38px 36px}.panel{padding:28px}.cards{grid-template-columns:1fr 1fr}.screen-card{min-height:180px}.record-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:719px){.wrap{width:min(100% - 20px,920px)}.hero,.panel{padding-left:18px;padding-right:18px}.two{grid-template-columns:1fr}.btns .btn{width:100%;min-width:0}.screen-card{grid-template-columns:40px minmax(0,1fr);padding:14px}.icon{width:40px;height:40px}.card-title,.reason,.meta,.help,.record-note{overflow-wrap:anywhere}.record-item select,input[type=number]{min-width:0}}
   @media print{body{background:white}.hero,.panel.form-panel,.btns,.notice,.sources,footer{display:none!important}#results{display:block!important}.panel{box-shadow:none;border:0;padding:0}.screen-card{break-inside:avoid}}
 </style>
 </head>
@@ -285,23 +286,31 @@
             <div class="record-item">
               <strong>女性 HPV 檢測</strong>
               <small>35、45、65 歲「當年齡」各 1 次；不是每幾年循環</small>
-              <select name="hpvRecord">
+              <select name="hpvRecord" data-year-target="hpvYearDetails">
                 <option value="">請選擇紀錄</option>
-                <option value="notdone">目前這個指定年齡尚未做過</option>
-                <option value="done">目前這個指定年齡已做過</option>
-                <option value="unknown">不確定</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
               </select>
+              <div id="hpvYearDetails" class="record-year-details">
+                <input id="hpvLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：105">
+              </div>
             </div>
 
             <div class="record-item">
               <strong>胃幽門螺旋桿菌糞便抗原檢測</strong>
               <small>45–74 歲｜公費終身 1 次</small>
-              <select name="gastricRecord">
+              <select name="gastricRecord" data-year-target="gastricYearDetails">
                 <option value="">請選擇紀錄</option>
-                <option value="never">此生從未使用過這項公費服務</option>
-                <option value="done">此生已使用過</option>
-                <option value="unknown">不確定</option>
+                <option value="never">從未做過</option>
+                <option value="known">曾做過，記得最近一次年份</option>
+                <option value="completed">本次資格期間已完成</option>
+                <option value="unknown">不確定／忘記上次時間</option>
               </select>
+              <div id="gastricYearDetails" class="record-year-details">
+                <input id="gastricLastYear" type="number" inputmode="numeric" min="1" max="115" placeholder="最近一次民國年份，例如：113">
+              </div>
             </div>
           </div>
 
@@ -311,7 +320,7 @@
 
       <div id="formError" class="error">請先完成出生年、性別、身分與風險資料，再進行判斷。</div>
       <div class="btns">
-        <button class="btn primary" id="checkBtn" type="button" onclick="window.__screeningClickLock=true;if(window.runScreeningCheck){window.runScreeningCheck();}setTimeout(function(){window.__screeningClickLock=false;},250);return false;">🔎 查看我的篩檢資格</button>
+        <button class="btn primary" id="checkBtn" type="button">🔎 查看我的篩檢資格</button>
         <button class="btn ghost" type="reset">重新填寫</button>
       </div>
       <div class="help" style="margin-top:10px">📱 若直接用 iPhone「檔案預覽」開啟 HTML，系統可能限制 JavaScript；正式發布到 GitHub Pages／一般瀏覽器後才是完整互動環境。</div>
@@ -403,6 +412,11 @@
     adultYearDetails.classList.remove('show');
     document.querySelectorAll('.record-year-details').forEach(el => el.classList.remove('show'));
     results.style.display='none';
+    cardsEl.innerHTML='';
+    resultSummary.innerHTML='';
+    eligibleCount.textContent='0';
+    ageText.textContent='';
+    window.__shareText='';
     errorBox.classList.remove('show');
   }, 0));
 
@@ -557,16 +571,24 @@
     }
     out.push(make('lung','低劑量電腦斷層 LDCT','🫁',lungRec.eligible,lungRec.reason,'每 2 年 1 次',lungRec.note,lungRec.status));
 
-    // HPV：指定年齡型，不用用「幾年前」判斷
-    const hpv = F && [35,45,65].includes(a);
+    // HPV：指定年齡型；最近一次年份只用來確認「目前這個指定年齡」是否已完成
     let hpvEligible=false, hpvReason='', hpvStatus='', hpvNote='';
     if(!F) hpvReason='公費 HPV 檢測對象為女性。';
     else if(![35,45,65].includes(a)) hpvReason='公費 HPV 檢測只在 35、45、65 歲「當年齡」各提供 1 次。';
-    else if(data.hpvRecord==='notdone'){
+    else if(data.hpvRecord==='never'){
       hpvEligible=true;
-      hpvReason=`今年政策年齡為 ${a} 歲，且你填寫目前這個指定年齡尚未使用過公費 HPV 檢測，初步判定目前可使用。`;
-    }else if(data.hpvRecord==='done'){
-      hpvReason=`今年政策年齡為 ${a} 歲，但你填寫目前這個指定年齡的公費 HPV 檢測已做過，因此不能重複使用。`;
+      hpvReason=`今年政策年齡為 ${a} 歲，且你填寫從未做過公費 HPV 檢測，初步判定目前可使用。`;
+    }else if(data.hpvRecord==='known'){
+      if(data.hpvLastYear===ROC_YEAR){
+        hpvReason=`今年政策年齡為 ${a} 歲；最近一次為民國 ${data.hpvLastYear} 年，表示目前這個指定年齡的公費 HPV 檢測已完成，因此不能重複使用。`;
+        hpvStatus='used';
+      }else{
+        hpvEligible=true;
+        hpvReason=`今年政策年齡為 ${a} 歲；最近一次為民國 ${data.hpvLastYear} 年，並非目前這個指定年齡的年度，初步判定今年仍可使用。`;
+        hpvNote='35、45、65 歲是三次各自獨立的指定年齡資格。';
+      }
+    }else if(data.hpvRecord==='completed'){
+      hpvReason=`今年政策年齡為 ${a} 歲，但你填寫本次資格期間已完成公費 HPV 檢測，因此不能重複使用。`;
       hpvStatus='used';
     }else{
       hpvReason=`今年政策年齡為 ${a} 歲，符合基本資格，但目前這個指定年齡是否已使用過公費 HPV 檢測尚未確認。`;
@@ -582,8 +604,11 @@
     else if(data.gastricRecord==='never'){
       gastricEligible=true;
       gastricReason='45–74 歲，且你填寫此生尚未使用過這項公費服務，初步判定目前可使用。';
-    }else if(data.gastricRecord==='done'){
-      gastricReason='45–74 歲，但你填寫此生已使用過這項「終身 1 次」公費服務，因此不能再次使用。';
+    }else if(data.gastricRecord==='known'){
+      gastricReason=`45–74 歲，但你填寫曾於民國 ${data.gastricLastYear} 年使用過這項「終身 1 次」公費服務，因此不能再次使用。`;
+      gastricStatus='used';
+    }else if(data.gastricRecord==='completed'){
+      gastricReason='45–74 歲，但你填寫本次資格期間已完成這項「終身 1 次」公費服務，因此不能再次使用。';
       gastricStatus='used';
     }else{
       gastricReason='45–74 歲，符合年齡條件，但是否曾使用過這項終身 1 次公費服務尚未確認。';
@@ -655,7 +680,9 @@
       ['cervixRecord','cervixLastYear','子宮頸抹片'],
       ['colonRecord','colonLastYear','糞便潛血檢查'],
       ['oralRecord','oralLastYear','口腔黏膜檢查'],
-      ['lungRecord','lungLastYear','肺癌 LDCT']
+      ['lungRecord','lungLastYear','肺癌 LDCT'],
+      ['hpvRecord','hpvLastYear','女性 HPV 檢測'],
+      ['gastricRecord','gastricLastYear','胃幽門螺旋桿菌檢測']
     ];
     for(const item of recordYearChecks){
       if(val(item[0])==='known'){
@@ -702,25 +729,19 @@
       lungRecord:val('lungRecord'),
       lungLastYear:val('lungRecord')==='known' ? num('lungLastYear') : NaN,
       hpvRecord:val('hpvRecord'),
-      gastricRecord:val('gastricRecord')
+      hpvLastYear:val('hpvRecord')==='known' ? num('hpvLastYear') : NaN,
+      gastricRecord:val('gastricRecord'),
+      gastricLastYear:val('gastricRecord')==='known' ? num('gastricLastYear') : NaN
     };
 
     render(evaluate(data),data);
   }
 
-  // 掛到全域，讓按鈕 inline onclick 也能直接執行；再保留事件監聽作為備援。
-  window.runScreeningCheck = runScreeningCheck;
-
   const checkBtn = document.getElementById('checkBtn');
   if(checkBtn){
     checkBtn.addEventListener('click', function(e){
       e.preventDefault();
-      // inline onclick 已先執行；若該環境忽略 inline handler，這裡仍可執行。
-      if(!window.__screeningClickLock){
-        window.__screeningClickLock = true;
-        runScreeningCheck();
-        setTimeout(function(){ window.__screeningClickLock = false; }, 250);
-      }
+      runScreeningCheck();
     });
   }
 
